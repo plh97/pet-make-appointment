@@ -17,30 +17,31 @@ interface List {
 }
 
 const axiosApi = axios.create({
-//   baseURL: `//${document.domain}:3000`,
+  //   baseURL: `//${document.domain}:3000`,
   timeout: 5000, // 请求超时时间
   withCredentials: true,
 });
+
 axiosApi.interceptors.response.use(
   (response: AxiosResponse) => {
     // 处理200的逻辑
-    const res = response.data
+    const res = response.data;
     if (res.code !== 0) {
       ElMessage({
         message: res.message,
-        type: 'error'
+        type: 'error',
       });
     }
     return response.data;
   },
   (error: AxiosError) => {
     if (error.response && error.response.status !== 401) {
-    ElMessage({
+      ElMessage({
         message: error.response.data?.message
           ? error.response.data?.message
           : 'Could not connect to server',
         type: 'error',
-        duration: 2000
+        duration: 2000,
       });
     }
     return Promise.reject(error);
@@ -48,7 +49,7 @@ axiosApi.interceptors.response.use(
 );
 
 axiosApi.interceptors.response.use((r: AxiosResponse) => {
-  return r.data
+  return r.data;
 });
 
 export const List = {
@@ -56,28 +57,28 @@ export const List = {
     return axiosApi({
       url: '/api/list',
       method: 'POST',
-      data
+      data,
     });
   },
   delete(id: string) {
     return axiosApi({
       url: '/api/list/' + id,
-      method: 'DELETE'
+      method: 'DELETE',
     });
   },
   update(data: List) {
     return axiosApi({
       url: '/api/list/' + data._id,
       method: 'PATCH',
-      data
+      data,
     });
   },
   get(): Promise<ResponseType> {
     return axiosApi.request<ResponseType, ResponseType>({
       url: '/api/list',
-      method: 'GET'
+      method: 'GET',
     });
-  }
+  },
 };
 
 // export const Account = {

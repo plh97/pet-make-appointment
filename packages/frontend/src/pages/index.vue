@@ -1,146 +1,184 @@
-<template lang="pug">
-.container
-    span {{ tableData }}
-    .header
-        el-button(type="primary" @click="centerDialogVisible=true") Add Book
-    el-table.table(
-        :data="tableData"
-        style="width: 100%"
-        border
-        height="250"
-    )
-        el-table-column(label="NO" sortable width="70")
-            template(#default="scope")
-                span {{ scope.$index+1 }}
-        el-table-column(prop="name" label="Name")
-            template(#default="scope")
-                el-input(v-if="currentEditLineId === scope.row._id" v-model="scope.row.name" size="small")
-                span(v-else) {{scope.row.name}}
-        el-table-column(prop="author" label="Author")
-            template(#default="scope")
-                el-input(v-if="currentEditLineId === scope.row._id" v-model="scope.row.author" size="small")
-                span(v-else) {{scope.row.author}}
-        el-table-column(prop="createAt" sortable label="CreateAt")
-            template(#default="scope")
-                span {{parseDate(scope.row.createAt)}}
-        el-table-column(prop="updateAt" sortable label="UpdateAt")
-            template(#default="scope")
-                span {{parseDate(scope.row.updateAt)}}
-        el-table-column(label="Action" width="160")
-            template(#default="scope")
-                el-button(@click="handleUpdateBook(scope.row)" v-if="currentEditLineId === scope.row._id" size="small" type="success") Save
-                el-button(@click="handleEditBook(scope.row._id)" v-else size="small" type="primary") Edit
-                el-button(@click="handleDeleteBook(scope.row._id)" size="small" type="danger") Delete
+<template>
+    <div class="container">
+        <div class="header">
+            <el-button type="primary" @click="data.centerDialogVisible = true">创建新预约</el-button>
+        </div>
+        <el-table class="table" :data="data.tableData" style="width: 100%" border>
+            <el-table-column type="index" width="50" />
+            <el-table-column prop="name" label="姓名">
+                <template #default="scope">
+                    <el-input v-if="data.datacurrentEditLineId === scope.row._id" v-model="scope.row.name"
+                        size="small" />
+                    <span v-else>{{ scope.row.name }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="description" label="描述">
+                <template #default="scope">
+                    <el-input type="textarea" v-if="data.currentEditLineId === scope.row._id"
+                        v-model="scope.row.description" size="small" />
+                    <span v-else>{{ scope.row.description }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="date" label="预约时间">
+                <template #default="scope">
+                    <!-- <span>{{ parseDate(scope.row.date) }}</span> -->
+                    <el-date-picker :readonly="data.currentEditLineId !== scope.row._id" v-model="scope.row.date"
+                        type="date" placeholder="选择日期" />
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" width="160">
+                <template #default="scope">
+                    <el-button @click="handleUpdateBook(scope.row)" v-if="data.currentEditLineId === scope.row._id"
+                        size="small" type="success">保存</el-button>
+                    <el-button @click="handleEditBook(scope.row._id)" v-else size="small"
+                        type="primary">Edit</el-button>
+                    <el-button @click="handleDeleteBook(scope.row._id)" size="small" type="danger">Delete</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination class="footer" v-if="data.totalCount > data.pageSize" layout="prev, pager, next"
+            :total="data.totalCount" :page-size="data.pageSize" />
+        <el-dialog align-center title="创建预约" v-model="data.centerDialogVisible" width="600px">
+            <div class="dialog-container">
+                <el-form ref="ruleFormRef" :model="dialogForm" label-width="80px" :rules="dialogRules">
+                    <el-form-item label="姓名" prop="name">
+                        <el-input v-model="dialogForm.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="描述" prop="description">
+                        <el-input v-model="dialogForm.description" />
+                    </el-form-item>
+                    <el-form-item label="日期" prop="date">
+                        <el-date-picker v-model="dialogForm.date" type="date" placeholder="选择日期" />
+                    </el-form-item>
+                </el-form>
+            </div>
+            <template #footer>
+                <span class="dialog-footer" slot="footer">
+                    <el-button @click="data.centerDialogVisible = false">取消</el-button>
+                    <el-button type="danger" @click="resetForm(ruleFormRef)">重置</el-button>
+                    <el-button type="primary" @click="handleCreateBook(ruleFormRef)">创建</el-button>
+                </span>
+            </template>
+        </el-dialog>
+    </div>
 </template>
 
-
-<script lang="ts">
-import Vue, { ref, onMounted, reactive } from 'vue'
-import { List } from "../api";
+<script lang="ts" setup>
+import { dayjs, ElMessage, FormInstance } from 'element-plus'
+import Vue, { ref, onMounted, reactive } from 'vue';
+import { List } from '../api';
 
 type Book = {
     _id: string;
     name: string;
-    author: string;
-    createAt: Date;
-    updateAt: Date;
+    description: string;
+    date: Date;
 };
 
+const ruleFormRef = ref<FormInstance>()
 
-export default {
-    setup() {
-        const form = ref<HTMLFormElement>(null)
-        const data = reactive({
-            centerDialogVisible: false,
-            tableData: [],
-            currentEditLineId: String(Math.random()),
-            dialogForm: {
-                _id: "",
-                name: "",
-                author: "",
-                createAt: new Date(),
-                updateAt: new Date()
-            }
-        })
-        const dialogRules = {
-            name: [
-                { required: true, message: "Require Book Name", trigger: "blur" },
-                { min: 3, message: "At Least 3 Letter", trigger: "blur" }
-                // { max: 10, message: "No More Than 10 Letter", trigger: "blur" }
-            ],
-            author: [
-                { required: true, message: "Require Book Author", trigger: "blur" },
-                { min: 1, message: "At Least 1 Letter", trigger: "blur" }
-                // { max: 10, message: "No More Than 10 Letter", trigger: "blur" }
-            ]
-        };
-        const method = {
-            parseDate(date) {
-                return (
-                    new Date(date).toLocaleDateString() +
-                    " " +
-                    new Date(date).toLocaleTimeString()
-                );
-            },
-            async init() {
-                try {
-                    const res = await List.get();
-                    data.tableData = res.list;
-                } catch (err) {
-                    ElMessage.error(err.message);
-                }
-            },
-            /**
-             * handleEditBook
-             * @param {id}
-             */
-            handleEditBook(id: string) {
-                data.currentEditLineId = id;
-            },
-            /**
-             * handleUpdateBook
-             * @param {id}
-             */
-            async handleUpdateBook(book: Book) {
-                await List.update(book);
-                method.init();
-                data.currentEditLineId = "";
-            },
-            /**
-             * handleSaveBook
-             * @param {id}
-             */
-            async handleDeleteBook(id: string) {
-                await List.delete(id);
-                method.init();
-            },
-            /**
-             * handleCreateBook
-             * @param {id}
-             */
-            async handleCreateBook(formName) {
-                form.validate(async (valid: boolean) => {
-                    if (valid) {
-                        data.centerDialogVisible = false;
-                        await List.create(data.dialogForm);
-                        method.init();
-                        data.dialogForm.name = "";
-                        data.dialogForm.author = "";
-                    }
-                });
-            },
-        }
-        return {
-            form,
-            dialogRules,
-            ...method,
-            ...data,
-        }
-    },
-    mounted() {
-        this.init();
-    },
+const data = reactive({
+    centerDialogVisible: false,
+    tableData: [],
+    pageSize: 20,
+    currentEditLineId: String(Math.random()),
+    totalCount: 0,
+});
+const dialogForm = reactive({
+    _id: '',
+    name: '',
+    description: '',
+    date: new Date(),
+});
+const dialogRules = {
+    name: [
+        { required: true, message: "姓名必须填写", trigger: "blur" },
+        { min: 2, message: "至少两个字", trigger: "blur" }
+    ],
+    description: [
+        { required: true, message: "描述必须填写", trigger: "blur" },
+        { min: 2, message: "至少两个字", trigger: "blur" }
+    ]
+};
+
+const resetForm = (formEl: FormInstance | undefined) => {
+    if (!formEl) return
+    formEl.resetFields()
 }
+
+const parseDate = (date: number) => {
+    return (
+        dayjs(date).format('YYYY-MM-DD HH:mm:ss') // '25/01/2019'
+    );
+}
+const init = async () => {
+    try {
+        const res = await List.get();
+        data.tableData = res.list;
+        data.totalCount = res.totalCount;
+    } catch (err) {
+        ElMessage.error(err.message);
+    }
+};
+/**
+ * handleEditBook
+ * @param {id}
+ */
+const handleEditBook = (id: string) => {
+    data.currentEditLineId = id;
+}
+/**
+ * handleUpdateBook
+ * @param {id}
+ */
+const handleUpdateBook = async (book: Book) => {
+    await List.update(book);
+    init();
+    data.currentEditLineId = '';
+};
+/**
+ * handleSaveBook
+ * @param {id}
+ */
+const handleDeleteBook = async (id: string) => {
+    await List.delete(id);
+    init();
+};
+/**
+ * handleCreateBook
+ * @param {id}
+ */
+
+
+const handleCreateBook = async (formEl: FormInstance | undefined) => {
+    if (!formEl) return
+    await formEl.validate(async (valid, fields) => {
+        if (valid) {
+            data.centerDialogVisible = false;
+            await List.create(dialogForm);
+            init();
+            dialogForm.name = '';
+            dialogForm.author = '';
+        } else {
+            console.log('error submit!', fields)
+        }
+    })
+}
+// const handleCreateBook = async (formRef) => {
+//     formRef.validate(async (valid: boolean) => {
+//         if (valid) {
+//             data.centerDialogVisible = false;
+//             await List.create(dialogForm);
+//             init();
+//             dialogForm.name = '';
+//             dialogForm.author = '';
+//         }
+//     });
+// };
+onMounted(() => {
+    init();
+});
+console.log(data.tableData);
 </script>
 
 <style lang="less">
@@ -148,7 +186,7 @@ export default {
     color: red;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: calc(100vh - 16px);
 
     .header {
         display: flex;
@@ -156,8 +194,13 @@ export default {
         margin-bottom: 10px;
     }
 
-    .row {
+    .table {
         flex: 1;
+    }
+
+    .footer {
+        margin-top: 10px;
+        align-self: center;
     }
 
     .dialog-container {
