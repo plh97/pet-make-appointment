@@ -7,31 +7,29 @@
             <el-table-column type="index" width="50" />
             <el-table-column prop="name" label="姓名">
                 <template #default="scope">
-                    <el-input v-if="data.currentEditLineId === scope.row._id" v-model="scope.row.name" size="small" />
+                    <el-input v-if="data.currentEditLineId === scope.row._id" v-model="scope.row.name" />
                     <span v-else>{{ scope.row.name }}</span>
                 </template>
             </el-table-column>
             <el-table-column prop="description" label="描述">
                 <template #default="scope">
                     <el-input type="textarea" v-if="data.currentEditLineId === scope.row._id"
-                        v-model="scope.row.description" size="small" />
+                        v-model="scope.row.description" />
                     <span v-else>{{ scope.row.description }}</span>
                 </template>
             </el-table-column>
             <el-table-column prop="date" label="预约时间">
                 <template #default="scope">
-                    <!-- <span>{{ parseDate(scope.row.date) }}</span> -->
-                    <el-date-picker :readonly="data.currentEditLineId !== scope.row._id" v-model="scope.row.date"
-                        type="date" placeholder="选择日期" />
+                    <span v-if="data.currentEditLineId !== scope.row._id">{{ parseDate(scope.row.date) }}</span>
+                    <el-date-picker v-else v-model="scope.row.date" type="date" placeholder="选择日期" />
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="160">
+            <el-table-column label="操作" width="200" align="right">
                 <template #default="scope">
                     <el-button @click="handleUpdateBook(scope.row)" v-if="data.currentEditLineId === scope.row._id"
-                        size="small" type="success">保存</el-button>
-                    <el-button @click="handleEditBook(scope.row._id)" v-else size="small"
-                        type="primary">Edit</el-button>
-                    <el-button @click="handleDeleteBook(scope.row._id)" size="small" type="danger">Delete</el-button>
+                        type="success">保存</el-button>
+                    <el-button @click="handleEditBook(scope.row._id)" v-else type="primary">编辑</el-button>
+                    <el-button @click="handleDeleteBook(scope.row._id)" type="danger">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -53,9 +51,9 @@
             </div>
             <template #footer>
                 <span class="dialog-footer" slot="footer">
-                    <el-button @click="data.centerDialogVisible = false">取消</el-button>
-                    <el-button type="danger" @click="resetForm(ruleFormRef)">重置</el-button>
-                    <el-button type="primary" @click="handleCreateBook(ruleFormRef)">创建</el-button>
+                    <el-button size="large" @click="data.centerDialogVisible = false">取消</el-button>
+                    <el-button size="large" type="danger" @click="resetForm(ruleFormRef)">重置</el-button>
+                    <el-button size="large" type="primary" @click="handleCreateBook(ruleFormRef)">创建</el-button>
                 </span>
             </template>
         </el-dialog>
@@ -63,6 +61,7 @@
 </template>
 
 <script lang="ts" setup>
+import dayjs from 'dayjs';
 import { ElMessage, FormInstance } from 'element-plus'
 import { ref, onMounted, reactive } from 'vue';
 import { List } from '../api';
@@ -100,11 +99,11 @@ const resetForm = (formEl: FormInstance | undefined) => {
     formEl.resetFields()
 }
 
-// const parseDate = (date: number) => {
-//     return (
-//         dayjs(date).format('YYYY-MM-DD HH:mm:ss') // '25/01/2019'
-//     );
-// }
+const parseDate = (date: number) => {
+    return (
+        dayjs(date).format('YYYY-MM-DD HH:mm:ss') // '25/01/2019'
+    );
+}
 const init = async () => {
     try {
         const res = await List.get();
