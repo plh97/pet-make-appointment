@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "db": "docker-compose up -d",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "lerna run dev"
+    "dev": "pnpm run db && lerna run dev"
   },
   "keywords": [],
   "author": "",

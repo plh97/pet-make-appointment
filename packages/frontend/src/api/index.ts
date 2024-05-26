@@ -1,20 +1,14 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ElMessage } from 'element-plus';
+import { APPOINTMENT } from './interface';
 
-interface ResponseType {
+interface ResponseType<T = unknown> {
   code: number;
-  data: any;
+  data: T;
   message: string;
 }
 
-interface List {
-  _id: string;
-  name: string;
-  description: string;
-  time: Date;
-  createAt: Date;
-  updateAt: Date;
-}
+interface List extends APPOINTMENT {}
 
 const axiosApi = axios.create({
   //   baseURL: `//${document.domain}:3000`,
@@ -52,6 +46,10 @@ axiosApi.interceptors.response.use((r: AxiosResponse) => {
   return r.data;
 });
 
+export const request = <T>(params: AxiosRequestConfig) => {
+  return axiosApi.request<ResponseType<T>, T>(params);
+};
+
 export const List = {
   create(data: List) {
     return axiosApi({
@@ -73,41 +71,10 @@ export const List = {
       data,
     });
   },
-  get(): Promise<ResponseType> {
-    return axiosApi.request<ResponseType, ResponseType>({
+  get() {
+    return request<{ list: APPOINTMENT[]; totalCount: number; page: number }>({
       url: '/api/list',
       method: 'GET',
     });
   },
 };
-
-// export const Account = {
-//   userInfo(data: LoginType) {
-//     return axiosApi.request<ResponseType, ResponseType>({
-//       url: '/api/userInfo',
-//       method: 'GET',
-//       withCredentials: true,
-//       data
-//     });
-//   },
-//   login(data: LoginType) {
-//     return axiosApi.request<ResponseType, ResponseType>({
-//       url: '/api/login',
-//       method: 'POST',
-//       data
-//     });
-//   },
-//   logout(data: LoginType) {
-//     return axiosApi.request<UserInfoType, ResponseType>({
-//       url: '/api/logout',
-//       method: 'POST',
-//     });
-//   },
-//   register(data: LoginType) {
-//     return axiosApi.request<UserInfoType, ResponseType>({
-//       url: '/api/register',
-//       method: 'POST',
-//       data
-//     });
-//   },
-// };

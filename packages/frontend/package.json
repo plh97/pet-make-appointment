@@ -15,7 +15,6 @@
     "less": "^4.2.0",
     "pug": "^3.0.2",
     "vue": "^3.4.21",
-    "vue-class-component": "^7.2.6",
     "vue-router": "^4.3.2"
   },
   "devDependencies": {

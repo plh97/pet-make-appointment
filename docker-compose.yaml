@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+  mongodb:
+    logging:
+      driver: none
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ewqewq
+    volumes:
+      - ./packages/database:/data/db
+    networks:
+      - back-tier
+    ports:
+      - "27017:27017"
+
+
+networks:
+  back-tier:
