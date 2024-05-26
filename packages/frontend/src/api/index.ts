@@ -8,7 +8,7 @@ interface ResponseType<T = unknown> {
   message: string;
 }
 
-interface List extends APPOINTMENT {}
+interface List extends APPOINTMENT { }
 
 const axiosApi = axios.create({
   //   baseURL: `//${document.domain}:3000`,
@@ -31,9 +31,7 @@ axiosApi.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response && error.response.status !== 401) {
       ElMessage({
-        message: error.response.data?.message
-          ? error.response.data?.message
-          : 'Could not connect to server',
+        message: 'Could not connect to server',
         type: 'error',
         duration: 2000,
       });

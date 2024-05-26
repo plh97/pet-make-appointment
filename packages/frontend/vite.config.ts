@@ -30,5 +30,8 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     }
+  },
+  preview: {
+    port: +(process.env.FRONTEND_PORT ?? 80),
   }
 })

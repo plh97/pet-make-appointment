@@ -7,8 +7,7 @@
             <el-table-column type="index" width="50" />
             <el-table-column prop="name" label="姓名">
                 <template #default="scope">
-                    <el-input v-if="data.currentEditLineId === scope.row._id" v-model="scope.row.name"
-                        size="small" />
+                    <el-input v-if="data.currentEditLineId === scope.row._id" v-model="scope.row.name" size="small" />
                     <span v-else>{{ scope.row.name }}</span>
                 </template>
             </el-table-column>
@@ -64,23 +63,17 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjs, ElMessage, FormInstance } from 'element-plus'
-import Vue, { ref, onMounted, reactive } from 'vue';
+import { ElMessage, FormInstance } from 'element-plus'
+import { ref, onMounted, reactive } from 'vue';
 import { List } from '../api';
 import { APPOINTMENT } from '../api/interface';
 
-type Book = {
-    _id: string;
-    name: string;
-    description: string;
-    date: Date;
-};
 
 const ruleFormRef = ref<FormInstance>()
 
 const data = reactive({
     centerDialogVisible: false,
-    tableData: [],
+    tableData: [] as APPOINTMENT[],
     pageSize: 20,
     currentEditLineId: String(Math.random()),
     totalCount: 0,
@@ -107,17 +100,18 @@ const resetForm = (formEl: FormInstance | undefined) => {
     formEl.resetFields()
 }
 
-const parseDate = (date: number) => {
-    return (
-        dayjs(date).format('YYYY-MM-DD HH:mm:ss') // '25/01/2019'
-    );
-}
+// const parseDate = (date: number) => {
+//     return (
+//         dayjs(date).format('YYYY-MM-DD HH:mm:ss') // '25/01/2019'
+//     );
+// }
 const init = async () => {
     try {
         const res = await List.get();
         data.tableData = res.list;
         data.totalCount = res.totalCount;
     } catch (err) {
+        // @ts-ignore
         ElMessage.error(err.message);
     }
 };

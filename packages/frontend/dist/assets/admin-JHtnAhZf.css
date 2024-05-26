@@ -1,0 +1,1 @@
+.container{color:red;display:flex;flex-direction:column;height:calc(100vh - 16px)}.container .header{display:flex;justify-content:flex-end;margin-bottom:10px}.container .table{flex:1}.container .footer{margin-top:10px;align-self:center}.container .dialog-container{padding-right:30px}

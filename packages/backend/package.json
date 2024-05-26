@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon -w src -x tsx src/main.ts",
-    "start": "NODE_ENV=production tsx src/main.ts",
-    "build": "vite build"
+    "start": "NODE_ENV=production tsx src/main.ts"
   },
   "dependencies": {
     "@types/mongoose": "^5.11.97",
