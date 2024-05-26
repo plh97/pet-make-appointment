@@ -3,7 +3,7 @@
         <div class="header">
             <el-button type="primary" @click="data.centerDialogVisible = true">创建新预约</el-button>
         </div>
-        <el-table class="table" :data="data.tableData" style="width: 100%" border>
+        <el-table class="table" :data="data.tableData" style="width: 100%">
             <el-table-column type="index" width="50" />
             <el-table-column prop="name" label="姓名">
                 <template #default="scope">
@@ -164,21 +164,11 @@ const handleCreateBook = async (formEl: FormInstance | undefined) => {
         }
     })
 }
-// const handleCreateBook = async (formRef) => {
-//     formRef.validate(async (valid: boolean) => {
-//         if (valid) {
-//             data.centerDialogVisible = false;
-//             await List.create(dialogForm);
-//             init();
-//             dialogForm.name = '';
-//             dialogForm.author = '';
-//         }
-//     });
-// };
+
 onMounted(() => {
     init();
 });
-console.log(data.tableData);
+
 </script>
 
 <style lang="less">

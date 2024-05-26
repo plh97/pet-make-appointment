@@ -3,7 +3,7 @@ import { connect, set } from 'mongoose';
 
 set('strictQuery', true);
 
-connect(process.env.MONGODB_ADDRESS)
+connect(process.env.MONGODB_ADDRESS ?? '')
   .then((e) => {
     console.log('connect mongodb success!');
     return e;
